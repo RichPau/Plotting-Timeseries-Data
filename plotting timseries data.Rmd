@@ -1,0 +1,83 @@
+---
+title: "Plotting Timesries Data"
+author: Rich Pauloo
+Date: 7/15/2017
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Packages
+```{r packages, warning = F, message = F}
+library(plotly)
+library(quantmod)
+library(xml2)
+library(zoo)
+```
+
+# Create some Data to Plot
+```{r data, warning = F, message = F}
+
+# create daily data for 5 years
+z = as.character(seq.POSIXt(as.POSIXct(as.Date("2000-11-30")), 
+                            as.POSIXct(as.Date("2005-11-30")), by = "1 day"))
+
+# define a variable L
+L = 1824 # L is the nrow of the z data frame, such that z is divisible by 4
+z = z[1:L] # subset timeseries data frame so it is divisible by 4
+str(z) # object is class 'character' and divisible by 4. proceed.
+
+# create data frame of 2 group variables to test
+dat = data.frame(time = z, 
+                 head = rnorm(L, mean = 16, sd = 2), 
+                 SWL = rnorm(L, mean = 14, sd = 3))
+
+head(dat) # view the 15 minute data
+
+```
+
+
+## Plot
+```{r plot}
+ds <- data.frame(Date = as.Date(dat$time), dat$head, dat$SWL)
+
+p <- plot_ly(ds, x = ~Date) %>%
+  add_lines(y = ~dat.head, name = "head") %>%
+  add_lines(y = ~dat.SWL, name = "SWL") %>%
+  layout(
+    title = "Head and SWL",
+    xaxis = list(
+      rangeselector = list(
+        buttons = list(
+          list(
+            count = 3,
+            label = "3 mo",
+            step = "month",
+            stepmode = "backward"),
+          list(
+            count = 6,
+            label = "6 mo",
+            step = "month",
+            stepmode = "backward"),
+          list(
+            count = 1,
+            label = "1 yr",
+            step = "year",
+            stepmode = "backward"),
+          list(
+            count = 1,
+            label = "YTD",
+            step = "year",
+            stepmode = "todate"),
+          list(step = "all"))),
+
+      rangeslider = list(type = "date")),
+
+    yaxis = list(title = "elevation above sea level (ft)"))
+
+p
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
